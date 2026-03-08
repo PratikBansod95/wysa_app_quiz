@@ -147,8 +147,28 @@ const QUESTIONS = [
   },
 ];
 
+const HOME_PROFILE_KEY = "wysa_quiz_profile_v1";
+const ORDER = ["strategist", "explorer", "connector", "builder"];
+const COLORS = {
+  strategist: "#4f46e5",
+  explorer: "#06b6d4",
+  connector: "#f59e0b",
+  builder: "#10b981",
+};
+
 let step = 0;
 let answers = [];
+let isAnalyzing = false;
+let analyzingTimer = null;
+
+function shuffleArray(items) {
+  const arr = [...items];
+  for (let i = arr.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 
 function getScores() {
   const base = { strategist: 0, explorer: 0, connector: 0, builder: 0 };
@@ -225,7 +245,6 @@ function getSummary(scores) {
   const [primary, secondary] = getTopTwo(scores);
   const p = DIMENSIONS[primary];
   const s = DIMENSIONS[secondary];
-
   return {
     primary,
     secondary,
@@ -236,7 +255,7 @@ function getSummary(scores) {
       `You are most effective when you combine ${p.label.toLowerCase()} energy with ${s.label.toLowerCase()} discipline.`,
     ],
     actionPlan: [
-      `Lean into what already works this week.`,
+      "Lean into what already works this week.",
       `Watch the trap: ${p.risk}`,
       `Upgrade path: ${p.improve}`,
       `Multiplier move: borrow one habit from ${s.label}. ${s.improve}`,
@@ -260,6 +279,29 @@ function progressPct() {
   return Math.round((Math.min(step, QUESTIONS.length) / QUESTIONS.length) * 100);
 }
 
+function getPieStyle(scores) {
+  const total = Math.max(1, ORDER.reduce((acc, key) => acc + scores[key], 0));
+  let current = 0;
+  const parts = ORDER.map((key) => {
+    const start = (current / total) * 360;
+    current += scores[key];
+    const end = (current / total) * 360;
+    return `${COLORS[key]} ${start}deg ${end}deg`;
+  });
+  return `conic-gradient(${parts.join(", ")})`;
+}
+
+function saveProfile(scores, summary) {
+  const payload = {
+    scores,
+    actionPlan: summary.actionPlan,
+    primary: summary.primary,
+    secondary: summary.secondary,
+    updatedAt: Date.now(),
+  };
+  window.localStorage.setItem(HOME_PROFILE_KEY, JSON.stringify(payload));
+}
+
 function renderIntro() {
   return `
     <article class="card">
@@ -279,52 +321,66 @@ function renderIntro() {
 
 function renderQuestion() {
   const q = QUESTIONS[step - 1];
-  const options = q.options
+  const shuffledOptions = shuffleArray(q.options).map((option, i) => ({
+    id: i,
+    option,
+    label: String.fromCharCode(65 + i),
+  }));
+  const options = shuffledOptions
     .map(
-      (option, i) =>
-        `<button class="option-btn" data-index="${i}"><strong>${String.fromCharCode(65 + i)}.</strong> ${escapeHtml(option.text)}</button>`
+      (item) =>
+        `<button class="option-btn" data-index="${item.id}"><strong>${item.label}.</strong> ${escapeHtml(item.option.text)}</button>`
     )
     .join("");
 
-  return `
-    <article class="card">
-      <div class="score-row" style="margin-bottom:8px;">
-        <span>Question ${step} / ${QUESTIONS.length}</span>
-        <span>${progressPct()}% complete</span>
-      </div>
-      <div class="progress-line"><div class="progress-fill" style="width:${progressPct()}%"></div></div>
-    </article>
-    <article class="card">
-      <div class="badge-row"><span class="badge">${escapeHtml(q.category)}</span></div>
-      <h2 class="question">${escapeHtml(q.prompt)}</h2>
-      <p style="margin-bottom:10px;">Choose what feels most automatic for you.</p>
-      <div class="options">${options}</div>
-    </article>
-  `;
+  return {
+    html: `
+      <article class="card">
+        <div class="score-row" style="margin-bottom:8px;">
+          <span>Question ${step} / ${QUESTIONS.length}</span>
+          <span>${progressPct()}% complete</span>
+        </div>
+        <div class="progress-line"><div class="progress-fill" style="width:${progressPct()}%"></div></div>
+      </article>
+      <article class="card">
+        <div class="badge-row"><span class="badge">${escapeHtml(q.category)}</span></div>
+        <h2 class="question">${escapeHtml(q.prompt)}</h2>
+        <p style="margin-bottom:10px;">Choose what feels most automatic for you.</p>
+        <div class="options">${options}</div>
+      </article>
+    `,
+    shuffledOptions,
+  };
 }
 
-function scoreRow(label, value) {
-  const width = Math.max(0, Math.min(100, (value / 30) * 100));
+function renderAnalyzing() {
   return `
-    <div>
-      <div class="score-row"><span>${label}</span><span>${value}/30</span></div>
-      <div class="score-bar"><span style="width:${width}%"></span></div>
-    </div>
+    <article class="card analyzing-card">
+      <h2>Analyzing your work style...</h2>
+      <p>We are mapping your response patterns to detect your dominant mode.</p>
+      <div class="thinking-dots"><span></span><span></span><span></span></div>
+    </article>
   `;
 }
 
 function renderResult() {
   const scores = getScores();
   const summary = getSummary(scores);
+  saveProfile(scores, summary);
+
   const antiPatterns = summary.antiPatterns
     .map(
       (item) =>
         `<div class="list-item"><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.body)}</p><p><strong>Fix:</strong> ${escapeHtml(item.fix)}</p></div>`
     )
     .join("");
-
   const strengths = summary.strengths.map((s) => `<div class="list-item">${escapeHtml(s)}</div>`).join("");
   const actions = summary.actionPlan.map((s) => `<div class="list-item">${escapeHtml(s)}</div>`).join("");
+  const pieStyle = getPieStyle(scores);
+  const pieLegend = ORDER.map(
+    (key) =>
+      `<div class="pie-legend-item"><span style="background:${COLORS[key]}"></span>${DIMENSIONS[key].label}: ${scores[key]}</div>`
+  ).join("");
 
   return `
     <article class="card">
@@ -338,12 +394,11 @@ function renderResult() {
 
     <article class="card">
       <h2 class="result-title">Your score profile</h2>
-      <div class="score-grid">
-        ${scoreRow("Strategist", scores.strategist)}
-        ${scoreRow("Explorer", scores.explorer)}
-        ${scoreRow("Connector", scores.connector)}
-        ${scoreRow("Builder", scores.builder)}
+      <div class="pie-wrap">
+        <div class="pie-chart" style="background:${pieStyle};"></div>
+        <div class="pie-hole"></div>
       </div>
+      <div class="pie-legend">${pieLegend}</div>
     </article>
 
     <article class="card">
@@ -363,7 +418,6 @@ function renderResult() {
       <div class="list">${actions}</div>
       <div class="button-row">
         <button id="shareQuiz" class="primary-btn">Share this quiz</button>
-        <button id="retakeQuiz" class="secondary-btn">Retake quiz</button>
       </div>
     </article>
   `;
@@ -376,38 +430,48 @@ function render() {
   if (step === 0) {
     app.innerHTML = renderIntro();
     const start = document.getElementById("startQuiz");
-    if (start) start.addEventListener("click", () => {
-      step = 1;
-      render();
-    });
+    if (start) {
+      start.addEventListener("click", () => {
+        step = 1;
+        render();
+      });
+    }
     return;
   }
 
   if (step > 0 && step <= QUESTIONS.length) {
-    app.innerHTML = renderQuestion();
+    const question = renderQuestion();
+    app.innerHTML = question.html;
     document.querySelectorAll(".option-btn").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         const target = e.currentTarget;
         const i = Number(target.getAttribute("data-index"));
-        answers.push(QUESTIONS[step - 1].options[i]);
+        answers.push(question.shuffledOptions[i].option);
         step += 1;
-        if (step > QUESTIONS.length) step = QUESTIONS.length + 1;
+        if (step > QUESTIONS.length) {
+          isAnalyzing = true;
+          render();
+          if (analyzingTimer) window.clearTimeout(analyzingTimer);
+          const delay = 3000 + Math.floor(Math.random() * 2001);
+          analyzingTimer = window.setTimeout(() => {
+            isAnalyzing = false;
+            step = QUESTIONS.length + 1;
+            render();
+          }, delay);
+          return;
+        }
         render();
       });
     });
     return;
   }
 
-  app.innerHTML = renderResult();
-  const retake = document.getElementById("retakeQuiz");
-  if (retake) {
-    retake.addEventListener("click", () => {
-      answers = [];
-      step = 0;
-      render();
-    });
+  if (isAnalyzing) {
+    app.innerHTML = renderAnalyzing();
+    return;
   }
 
+  app.innerHTML = renderResult();
   const share = document.getElementById("shareQuiz");
   if (share) {
     share.addEventListener("click", async () => {

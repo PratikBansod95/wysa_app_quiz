@@ -234,10 +234,11 @@ body {
 }
 
 .card-recommended-quiz {
-  min-height: 210px;
+  min-height: 270px;
   color: #f3f8ff;
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
+  justify-content: flex-end;
   font-size: 30px;
   line-height: 1.16;
   font-weight: 500;
@@ -254,6 +255,61 @@ body {
 .quiz-link {
   text-decoration: none;
   cursor: pointer;
+}
+
+.quiz-profile-preview {
+  margin-top: 14px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(5, 10, 25, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 14px;
+  padding: 10px;
+}
+
+.mini-pie-wrap {
+  width: 72px;
+  height: 72px;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.mini-pie-chart {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.mini-pie-hole {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(19, 28, 58, 0.9);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.mini-points {
+  min-width: 0;
+}
+
+.mini-points-title {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  opacity: 0.86;
+}
+
+.rotating-point {
+  margin: 6px 0 0;
+  font-size: 14px;
+  line-height: 1.3;
+  color: #eff6ff;
 }
 
 .premium-label {
