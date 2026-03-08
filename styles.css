@@ -94,6 +94,11 @@ body {
   font-weight: 500;
 }
 
+.strengths-title {
+  letter-spacing: 2.2px;
+  line-height: 1.25;
+}
+
 .feature-row {
   display: flex;
   justify-content: space-between;
