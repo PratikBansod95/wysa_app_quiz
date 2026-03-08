@@ -251,6 +251,11 @@ body {
   max-width: 90%;
 }
 
+.quiz-link {
+  text-decoration: none;
+  cursor: pointer;
+}
+
 .premium-label {
   position: absolute;
   top: 18px;
