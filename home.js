@@ -35,6 +35,7 @@
     const points = payload.actionPlan.slice(0, 4);
     let i = 0;
     let touchStartX = null;
+    let pointerStartX = null;
     const dotEls = Array.from(dotsContainer.querySelectorAll("span")).slice(0, points.length);
 
     function renderCurrentPoint() {
@@ -54,6 +55,11 @@
       renderCurrentPoint();
     }
 
+    function setPointByIndex(nextIndex) {
+      i = (nextIndex + points.length) % points.length;
+      renderCurrentPoint();
+    }
+
     pointsFrame.addEventListener("touchstart", (event) => {
       touchStartX = event.changedTouches[0].clientX;
     });
@@ -70,6 +76,32 @@
       } else {
         swipePrev();
       }
+    });
+
+    pointsFrame.addEventListener("pointerdown", (event) => {
+      pointerStartX = event.clientX;
+    });
+
+    pointsFrame.addEventListener("pointerup", (event) => {
+      if (pointerStartX === null) return;
+      const delta = event.clientX - pointerStartX;
+      pointerStartX = null;
+      if (Math.abs(delta) < 28) return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (delta < 0) {
+        swipeNext();
+      } else {
+        swipePrev();
+      }
+    });
+
+    dotEls.forEach((dot, idx) => {
+      dot.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setPointByIndex(idx);
+      });
     });
 
     pointsFrame.addEventListener("click", (event) => {

@@ -323,6 +323,8 @@ body {
   display: flex;
   align-items: center;
   touch-action: pan-y;
+  user-select: none;
+  cursor: grab;
 }
 
 .point-dots {
