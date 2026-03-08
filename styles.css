@@ -233,6 +233,24 @@ body {
   font-size: 22px;
 }
 
+.card-recommended-quiz {
+  min-height: 210px;
+  color: #f3f8ff;
+  display: flex;
+  align-items: flex-end;
+  font-size: 30px;
+  line-height: 1.16;
+  font-weight: 500;
+  background:
+    radial-gradient(circle at 12% 22%, rgba(255, 208, 125, 0.28) 0 15%, transparent 16%),
+    radial-gradient(circle at 86% 76%, rgba(158, 222, 255, 0.22) 0 18%, transparent 19%),
+    linear-gradient(145deg, #305f8f 5%, #3f6fad 43%, #5b4fb3 100%);
+}
+
+.card-recommended-quiz p {
+  max-width: 90%;
+}
+
 .premium-label {
   position: absolute;
   top: 18px;
