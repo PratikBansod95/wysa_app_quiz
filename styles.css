@@ -244,8 +244,8 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  font-size: 30px;
-  line-height: 1.16;
+  font-size: 20px;
+  line-height: 1.22;
   font-weight: 500;
   background:
     radial-gradient(circle at 12% 22%, rgba(255, 208, 125, 0.28) 0 15%, transparent 16%),
@@ -254,7 +254,8 @@ body {
 }
 
 .card-recommended-quiz p {
-  max-width: 90%;
+  max-width: 78%;
+  margin-bottom: 4px;
 }
 
 .quiz-link {
