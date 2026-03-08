@@ -416,8 +416,9 @@ function renderResult() {
     <article class="card">
       <h2 class="result-title">What you should do next</h2>
       <div class="list">${actions}</div>
-      <div class="button-row">
-        <button id="shareQuiz" class="primary-btn">Share this quiz</button>
+      <div class="share-panel">
+        <p class="share-panel-text">Help Your team finidng their work style</p>
+        <button id="shareQuiz" class="share-pill">Share</button>
       </div>
     </article>
   `;

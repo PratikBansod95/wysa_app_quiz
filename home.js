@@ -24,19 +24,60 @@
     const wrapper = document.getElementById("quizProfilePreview");
     const pie = document.getElementById("miniPieChart");
     const rotatingPoint = document.getElementById("rotatingPoint");
-    if (!wrapper || !pie || !rotatingPoint) return;
+    const dotsContainer = document.getElementById("pointDots");
+    const pointsFrame = document.getElementById("pointsFrame");
+    if (!wrapper || !pie || !rotatingPoint || !dotsContainer || !pointsFrame) return;
     if (!payload || !payload.scores || !Array.isArray(payload.actionPlan) || payload.actionPlan.length === 0) return;
 
     pie.style.background = getPieStyle(payload.scores);
     wrapper.hidden = false;
 
+    const points = payload.actionPlan.slice(0, 4);
     let i = 0;
-    const points = payload.actionPlan;
-    rotatingPoint.textContent = points[0];
-    window.setInterval(() => {
-      i = (i + 1) % points.length;
+    let touchStartX = null;
+    const dotEls = Array.from(dotsContainer.querySelectorAll("span")).slice(0, points.length);
+
+    function renderCurrentPoint() {
       rotatingPoint.textContent = points[i];
-    }, 2600);
+      dotEls.forEach((el, idx) => {
+        el.classList.toggle("active", idx === i);
+      });
+    }
+
+    function swipeNext() {
+      i = (i + 1) % points.length;
+      renderCurrentPoint();
+    }
+
+    function swipePrev() {
+      i = (i - 1 + points.length) % points.length;
+      renderCurrentPoint();
+    }
+
+    pointsFrame.addEventListener("touchstart", (event) => {
+      touchStartX = event.changedTouches[0].clientX;
+    });
+
+    pointsFrame.addEventListener("touchend", (event) => {
+      if (touchStartX === null) return;
+      const endX = event.changedTouches[0].clientX;
+      const delta = endX - touchStartX;
+      touchStartX = null;
+      if (Math.abs(delta) < 28) return;
+      event.preventDefault();
+      if (delta < 0) {
+        swipeNext();
+      } else {
+        swipePrev();
+      }
+    });
+
+    pointsFrame.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    });
+
+    renderCurrentPoint();
   }
 
   try {
