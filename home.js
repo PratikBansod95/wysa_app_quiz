@@ -36,6 +36,7 @@
     let i = 0;
     let touchStartX = null;
     let pointerStartX = null;
+    let autoSlideTimer = null;
     const dotEls = Array.from(dotsContainer.querySelectorAll("span")).slice(0, points.length);
 
     function renderCurrentPoint() {
@@ -60,6 +61,15 @@
       renderCurrentPoint();
     }
 
+    function restartAutoSlide() {
+      if (autoSlideTimer) {
+        window.clearInterval(autoSlideTimer);
+      }
+      autoSlideTimer = window.setInterval(() => {
+        swipeNext();
+      }, 10000);
+    }
+
     pointsFrame.addEventListener("touchstart", (event) => {
       touchStartX = event.changedTouches[0].clientX;
     });
@@ -76,6 +86,7 @@
       } else {
         swipePrev();
       }
+      restartAutoSlide();
     });
 
     pointsFrame.addEventListener("pointerdown", (event) => {
@@ -94,6 +105,7 @@
       } else {
         swipePrev();
       }
+      restartAutoSlide();
     });
 
     dotEls.forEach((dot, idx) => {
@@ -101,6 +113,7 @@
         event.preventDefault();
         event.stopPropagation();
         setPointByIndex(idx);
+        restartAutoSlide();
       });
     });
 
@@ -110,6 +123,7 @@
     });
 
     renderCurrentPoint();
+    restartAutoSlide();
   }
 
   try {

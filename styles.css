@@ -243,10 +243,11 @@ body {
   color: #f3f8ff;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: flex-start;
   font-size: 20px;
   line-height: 1.22;
   font-weight: 500;
+  padding-top: 18px;
   background:
     radial-gradient(circle at 12% 22%, rgba(255, 208, 125, 0.28) 0 15%, transparent 16%),
     radial-gradient(circle at 86% 76%, rgba(158, 222, 255, 0.22) 0 18%, transparent 19%),
@@ -254,8 +255,8 @@ body {
 }
 
 .card-recommended-quiz p {
-  max-width: 78%;
-  margin-bottom: 4px;
+  max-width: 74%;
+  margin-bottom: 0;
 }
 
 .quiz-link {
@@ -264,7 +265,7 @@ body {
 }
 
 .quiz-profile-preview {
-  margin-top: 14px;
+  margin-top: auto;
   width: 100%;
   display: flex;
   align-items: center;
