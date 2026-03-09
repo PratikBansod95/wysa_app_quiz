@@ -21,15 +21,21 @@
   }
 
   function hydratePreview(payload) {
+    const quizCard = document.querySelector(".card-recommended-quiz");
     const wrapper = document.getElementById("quizProfilePreview");
     const pie = document.getElementById("miniPieChart");
     const rotatingPoint = document.getElementById("rotatingPoint");
     const dotsContainer = document.getElementById("pointDots");
     const pointsFrame = document.getElementById("pointsFrame");
-    if (!wrapper || !pie || !rotatingPoint || !dotsContainer || !pointsFrame) return;
-    if (!payload || !payload.scores || !Array.isArray(payload.actionPlan) || payload.actionPlan.length === 0) return;
+    if (!quizCard || !wrapper || !pie || !rotatingPoint || !dotsContainer || !pointsFrame) return;
+    if (!payload || !payload.scores || !Array.isArray(payload.actionPlan) || payload.actionPlan.length === 0) {
+      quizCard.classList.remove("has-profile");
+      wrapper.hidden = true;
+      return;
+    }
 
     pie.style.background = getPieStyle(payload.scores);
+    quizCard.classList.add("has-profile");
     wrapper.hidden = false;
 
     const points = payload.actionPlan.slice(0, 4);
