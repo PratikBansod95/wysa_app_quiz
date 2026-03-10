@@ -476,9 +476,12 @@ function render() {
   const share = document.getElementById("shareQuiz");
   if (share) {
     share.addEventListener("click", async () => {
+      const scores = getScores();
+      const summary = getSummary(scores);
+      const resultLabel = `${DIMENSIONS[summary.primary].label} x ${DIMENSIONS[summary.secondary].label}`;
       const shareText =
-        "I just took this Work Brain Diagnostic and got a surprisingly accurate read on how I work. Try it.";
-      const shareUrl = window.location.href;
+        `Heya I just took this Work Brain Diagnostic quiz on wysa and got a surprisingly accurate read on how I work, My way of working is ${resultLabel}.\nClick on the link to find out yours: https://dev-widget.wysa.io/wrapper/accenturementalwellbeing/`;
+      const shareUrl = "https://dev-widget.wysa.io/wrapper/accenturementalwellbeing/";
 
       if (navigator.share) {
         try {
